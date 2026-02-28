@@ -1607,6 +1607,9 @@ textarea.form-control {
   font-size: 0.78rem;
   color: var(--muted);
   margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .foro-meta strong {
   color: var(--ink);
@@ -1615,11 +1618,57 @@ textarea.form-control {
 .foro-meta strong:hover {
   color: var(--purple);
 }
+.foro-delete {
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  margin-left: auto;
+}
+.foro-delete:hover {
+  opacity: 1;
+  color: var(--pink);
+}
 .foro-text {
   background: var(--cream);
   padding: 0.65rem 0.9rem;
   border-radius: 0 10px 10px 10px;
   font-size: 0.9rem;
+}
+.foro-reply-btn {
+  font-size: 0.75rem;
+  color: var(--purple);
+  cursor: pointer;
+  margin-top: 0.4rem;
+  display: inline-block;
+  font-weight: 500;
+}
+.foro-reply-btn:hover {
+  text-decoration: underline;
+}
+.foro-reply-box {
+  margin-top: 0.5rem;
+}
+.foro-replies {
+  margin-top: 0.75rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+}
+.foro-reply {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.foro-reply:last-child {
+  margin-bottom: 0;
+}
+.foro-reply .foro-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 0.75rem;
+}
+.foro-reply .foro-text {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
 }
 
 /* ─── REUNION STATUS ──────────────────────────────────────── */
@@ -1668,6 +1717,26 @@ textarea.form-control {
   justify-content: center;
   color: var(--muted);
   font-size: 0.9rem;
+}
+#mapPicker {
+  z-index: 1;
+}
+#mapPicker .leaflet-control-attribution {
+  font-size: 0.65rem;
+}
+.map-locate-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(45, 38, 64, 0.15);
 }
 
 /* ─── ALERTS ──────────────────────────────────────────────── */

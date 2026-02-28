@@ -98,8 +98,11 @@ function renderReunionForm({ edit = false, reunion = {} } = {}) {
     return;
   }
   const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+  const lat = reunion.Lugar?.Latitud || 19.4326;
+  const lng = reunion.Lugar?.Longitud || -99.1332;
+  
   app.innerHTML = `
-  <div class="container" style="max-width:600px;padding:2rem 1.5rem">
+  <div class="container" style="max-width:700px;padding:2rem 1.5rem">
     <div class="back-btn" onclick="navigate('reuniones')">← Reuniones</div>
     <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:1.5rem">${edit ? "Editar Reunión" : "Nueva Reunión"}</h2>
     <div class="form-group"><label class="form-label">Nombre de la reunión *</label><input class="form-control" id="rnNombre" value="${reunion.NombreReunion || ""}"></div>
@@ -109,10 +112,22 @@ function renderReunionForm({ edit = false, reunion = {} } = {}) {
         ${["activa", "cancelada", "finalizada"].map((s) => `<option value="${s}" ${reunion.status === s ? "selected" : ""}>${s}</option>`).join("")}
       </select>
     </div>
-    <div class="form-group"><label class="form-label">Dirección</label><input class="form-control" id="rnDir" value="${reunion.Lugar?.Direccion || ""}"></div>
-    <div class="location-group">
-      <div class="form-group"><label class="form-label">Latitud</label><input class="form-control" id="rnLat" type="number" step="any" value="${reunion.Lugar?.Latitud || ""}"></div>
-      <div class="form-group"><label class="form-label">Longitud</label><input class="form-control" id="rnLng" type="number" step="any" value="${reunion.Lugar?.Longitud || ""}"></div>
+    <div class="form-group">
+      <label class="form-label">📍 Ubicación (haz clic en el mapa)</label>
+      <div style="position:relative">
+        <div id="mapPicker" style="height:300px;border-radius:10px;border:1px solid var(--border);margin-bottom:.75rem"></div>
+        <button class="btn btn-primary btn-sm map-locate-btn" onclick="locateMe()" title="Ir a mi ubicación">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+      <input class="form-control" id="rnDir" placeholder="Dirección" value="${reunion.Lugar?.Direccion || ""}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem">
+        <input class="form-control" id="rnLat" placeholder="Latitud" readonly value="${lat}">
+        <input class="form-control" id="rnLng" placeholder="Longitud" readonly value="${lng}">
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label" style="display:flex;align-items:center;gap:.5rem">
@@ -130,6 +145,57 @@ function renderReunionForm({ edit = false, reunion = {} } = {}) {
     <div class="form-group"><label class="form-label">Hora</label><input class="form-control" id="rnHora" type="time" value="${reunion.Hora || ""}"></div>
     <button class="btn btn-primary" onclick="${edit ? `doEditReunion('${reunion.id}')` : "doCreateReunion()"}">💾 Guardar</button>
   </div>`;
+  
+  // Inicializar mapa
+  setTimeout(() => initMapPicker(lat, lng), 100);
+}
+
+let _mapPicker = null;
+let _mapMarker = null;
+
+function initMapPicker(lat, lng) {
+  if (_mapPicker) _mapPicker.remove();
+  
+  _mapPicker = L.map('mapPicker').setView([lat, lng], 13);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(_mapPicker);
+  
+  _mapMarker = L.marker([lat, lng], { draggable: true }).addTo(_mapPicker);
+  
+  // Actualizar coordenadas al arrastrar marcador
+  _mapMarker.on('dragend', function(e) {
+    const pos = e.target.getLatLng();
+    $("rnLat").value = pos.lat.toFixed(6);
+    $("rnLng").value = pos.lng.toFixed(6);
+  });
+  
+  // Actualizar marcador al hacer clic en el mapa
+  _mapPicker.on('click', function(e) {
+    _mapMarker.setLatLng(e.latlng);
+    $("rnLat").value = e.latlng.lat.toFixed(6);
+    $("rnLng").value = e.latlng.lng.toFixed(6);
+  });
+}
+
+function locateMe() {
+  if (!navigator.geolocation) {
+    toast('Geolocalización no disponible', false);
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      _mapPicker.setView([lat, lng], 15);
+      _mapMarker.setLatLng([lat, lng]);
+      $("rnLat").value = lat.toFixed(6);
+      $("rnLng").value = lng.toFixed(6);
+      toast('📍 Ubicación encontrada');
+    },
+    () => toast('No se pudo obtener ubicación', false)
+  );
 }
 
 function toggleRecurrente() {

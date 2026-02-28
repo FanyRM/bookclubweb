@@ -30,6 +30,7 @@ def crear_mensaje():
         "refId": data.get("refId"),
         "idUsuario": data.get("idUsuario", session.get("user_id","")),
         "Contenido": data.get("Contenido", ""),
+        "idMensajePadre": data.get("idMensajePadre"),  # Para hilos
         "fechaCreacion": datetime.datetime.utcnow()
     }
     result = mongo.db.foros.insert_one(mensaje)
